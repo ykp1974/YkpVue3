@@ -13,6 +13,9 @@
         data: () => ({
             message: ""
         }),
+        props: {
+            ValPrms: String  
+        },
         methods: {
             submit(){
             this.message = "submit";

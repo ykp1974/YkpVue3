@@ -7,6 +7,7 @@
 </template>
 
 <script>
+import axios from 'axios';
     export default {
         props: ['message'],
         data() {
@@ -16,6 +17,13 @@
         },
         methods: {
             createUser: function () {
+                axios.get('https://script.google.com/macros/s/AKfycbxfjkupWXr6H8ajERs2h74pI7XMg6HwUuOWdfzcXvma3F0zvb_6KNhP-lwc1BtQUnE/exec?order='+this.message)
+                .then(response => {
+                    console.log(response.data);
+                })
+                .catch(error => {
+                    console.error('Error fetching data: ', error);
+                });
                 alert('createUser!');
             }
         }

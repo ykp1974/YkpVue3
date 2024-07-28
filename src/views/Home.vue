@@ -2,44 +2,21 @@
     <h1>Home Page</h1>
     <template v-for="link in data.parVals2" :key="link.text">
       <button v-on:click="handleButtonClick" :test="link.text">{{ link.text }}</button>
-    </template>
+</template>
+<div>
     <span id="spn1">表示用のテキスト</span>
+</div>
 </template>
 <script>
 import axios from 'axios';
 export default {
   name: 'AppVue',
   props: {
-    msg: String
+    message: String
   },
   data() {
     return {
       data: {
-        title: "Vue.js アプリケーションへようこそ！",
-        links: [
-          {
-            text: "コア ドキュメント",
-            href: "https://vuejs.org"
-          },
-          {
-            text: "フォーラム",
-            href: "https://forum.vuejs.org"
-          },
-          {
-            text: "Community Chat",
-            href: "https://chat.vuejs.org"
-          },
-          ],
-        parVals: [
-          {
-            text: "123パラメータ1",
-            value: "値1"
-          },
-          {
-            text: "456パラメータ2",
-            value: "値2"
-          },
-        ],
         parVals2: [
         ]
       }
@@ -61,9 +38,11 @@ export default {
   },
   methods: {
     handleButtonClick(event) {
+      console.log('message->'+this.message);
       const buttonLabel = event.target.getAttribute('test');
       const outputText = `${buttonLabel}がクリックされました！`;
       console.log(outputText);
+      this.$emit('updateMessage', outputText);
       document.getElementById('spn1').textContent = outputText;
     }
   }
