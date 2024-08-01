@@ -33,38 +33,54 @@ export default {
     };
   },
   mounted() {
+    // ローカルストレージからoutputTextsを読み込む
+    const savedOutputTexts = JSON.parse(localStorage.getItem('outputTexts')) || [];
+    this.outputTexts = savedOutputTexts;
+    
     axios.get('/test2.json')
       .then(response => {
-        this.data.parVals2 = response.data.map(element => ({
-          text: element.text,
-          value: element.value,
-          active: false // 初期状態はOFF
-        }));
+        // this.data.parVals2 = response.data.map(element => ({
+        //   text: element.text,
+        //   value: element.value,
+        //   active: false // 初期状態はOFF
+        // }));
+        this.data.parVals2 = response.data.map(element => {
+          const isActive = savedOutputTexts.some(item => item.text === element.text && item.status === 'ON');
+          return {
+            text: element.text,
+            value: element.value,
+            active: isActive // ローカルストレージの状態を反映
+          };
+        });
       })
       .catch(error => {
         console.error('Error fetching data: ', error);
       });
   },
   methods: {
-    handleButtonClick(link) {
-      link.active = !link.active; // ON/OFFの切り替え
-      const outputText = {
-        text: link.text,
-        status: link.active ? 'ON' : 'OFF'
-      };
+  handleButtonClick(link) {
+    link.active = !link.active; // ON/OFFの切り替え
+    const outputText = {
+      text: link.text,
+      status: link.active ? 'ON' : 'OFF'
+    };
 
-      if (link.active) {
-        // ONの場合は追加
-        this.outputTexts.push(outputText);
-      } else {
-        // OFFの場合は削除
-        this.outputTexts = this.outputTexts.filter(item => item.text !== link.text);
-      }
-
-      console.log("this.outputTexts=>", JSON.stringify(this.outputTexts, null, 2)); // JSON形式で出力
-      this.$emit('updateMessage', `${outputText.text}が${outputText.status}になりました！`);
-      document.getElementById('spn1').textContent = `${outputText.text}が${outputText.status}になりました！`;
+    if (link.active) {
+      // ONの場合は追加
+      this.outputTexts.push(outputText);
+    } else {
+      // OFFの場合は削除
+      this.outputTexts = this.outputTexts.filter(item => item.text !== link.text);
     }
+
+    // ローカルストレージに保存
+    localStorage.setItem('outputTexts', JSON.stringify(this.outputTexts));
+
+    console.log("this.outputTexts=>", JSON.stringify(this.outputTexts, null, 2)); // JSON形式で出力
+    this.$emit('updateMessage', `${outputText.text}が${outputText.status}になりました！`);
+    this.$emit('updateOutputTexts', this.outputTexts);
+    document.getElementById('spn1').textContent = `${outputText.text}が${outputText.status}になりました！`;
+  }
   }
 };
 </script>
