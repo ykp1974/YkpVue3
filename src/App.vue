@@ -21,9 +21,9 @@ export default {
       this.message = newMessage;
     },
     updateOutputTexts(newOutputTexts) {
-      console.log('this.outputTexts@@-->'+JSON.stringify(newOutputTexts))
-      this.message = newOutputTexts.map(item => item.text).join(', ');
-      this.outputTexts = newOutputTexts.map(item => item.text);
+      console.log('this.outputTexts@@-->'+JSON.stringify(newOutputTexts));
+      // OFFの場合は削除
+      this.outputTexts = newOutputTexts.filter(item => item.status !== 'OFF').map(item => item.text);
     }
   }    
 };

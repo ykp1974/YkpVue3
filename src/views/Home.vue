@@ -16,8 +16,10 @@
     <span id="spn1">表示用のテキスト</span>
   </div>
 </template>
+
 <script>
 import axios from 'axios';
+import { useButtonStore } from './store';
 
 export default {
   name: 'AppVue',
@@ -28,28 +30,19 @@ export default {
     return {
       data: {
         parVals2: [],
-      },
-      outputTexts: [] // outputTextを蓄積するための配列を追加
+      }
     };
   },
   mounted() {
-    // ローカルストレージからoutputTextsを読み込む
-    const savedOutputTexts = JSON.parse(localStorage.getItem('outputTexts')) || [];
-    this.outputTexts = savedOutputTexts;
-    
+    const buttonStore = useButtonStore();
     axios.get('/test2.json')
       .then(response => {
-        // this.data.parVals2 = response.data.map(element => ({
-        //   text: element.text,
-        //   value: element.value,
-        //   active: false // 初期状態はOFF
-        // }));
         this.data.parVals2 = response.data.map(element => {
-          const isActive = savedOutputTexts.some(item => item.text === element.text && item.status === 'ON');
+          const isActive = buttonStore.outputTexts.some(item => item.text === element.text && item.status === 'ON');
           return {
             text: element.text,
             value: element.value,
-            active: isActive // ローカルストレージの状態を反映
+            active: isActive // ストアの状態を反映
           };
         });
       })
@@ -58,32 +51,23 @@ export default {
       });
   },
   methods: {
-  handleButtonClick(link) {
-    link.active = !link.active; // ON/OFFの切り替え
-    const outputText = {
-      text: link.text,
-      status: link.active ? 'ON' : 'OFF'
-    };
+    handleButtonClick(link) {
+      const buttonStore = useButtonStore();
+      link.active = !link.active; // ON/OFFの切り替え
+      buttonStore.toggleButton(link.text);
 
-    if (link.active) {
-      // ONの場合は追加
-      this.outputTexts.push(outputText);
-    } else {
-      // OFFの場合は削除
-      this.outputTexts = this.outputTexts.filter(item => item.text !== link.text);
+      // outputTextsを更新
+      this.outputTexts = buttonStore.outputTexts.map(item => item.text);
+    
+      console.log("buttonStore.outputTexts=>", JSON.stringify(buttonStore.outputTexts, null, 2)); // JSON形式で出力
+      this.$emit('updateMessage', `${link.text}が${link.active ? 'ON' : 'OFF'}になりました！`);
+      this.$emit('updateOutputTexts', buttonStore.outputTexts);
+      document.getElementById('spn1').textContent = `${link.text}が${link.active ? 'ON' : 'OFF'}になりました！`;
     }
-
-    // ローカルストレージに保存
-    localStorage.setItem('outputTexts', JSON.stringify(this.outputTexts));
-
-    console.log("this.outputTexts=>", JSON.stringify(this.outputTexts, null, 2)); // JSON形式で出力
-    this.$emit('updateMessage', `${outputText.text}が${outputText.status}になりました！`);
-    this.$emit('updateOutputTexts', this.outputTexts);
-    document.getElementById('spn1').textContent = `${outputText.text}が${outputText.status}になりました！`;
-  }
   }
 };
 </script>
+
 <style>
 .large-button {
   width: 300px;
