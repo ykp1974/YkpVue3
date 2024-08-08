@@ -84,7 +84,7 @@ export default {
   display: flex;
   flex-wrap: wrap;
   max-height: 600px; /* 2つのボタンの高さ */
-  max-width: 640px; /* 2つのボタンの高さ */
+  max-width: 640px; /* 2つのボタンの幅 */
   overflow-y: scroll;
 }
 </style>
