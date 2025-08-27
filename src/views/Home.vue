@@ -3,7 +3,7 @@
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <h1>Home Page</h1>
   <div class="button-container">
-    <template v-for="link in data.parVals2" :key="link.text">
+    <template v-for="link in buttonData" :key="link.text">
       <button 
         v-on:click="handleButtonClick(link)" 
         :class="{'large-button btn': true, 'active': link.active}" 
@@ -29,73 +29,79 @@
 import axios from 'axios';
 import { useButtonStore } from './store';
 import TestModal from './TestModal.vue';
+import { computed, onMounted, ref } from 'vue';
 
 export default {
   name: 'AppVue',
   components: {
     TestModal
   },
-  data() {
-    return {
-      data: {
-        parVals2: [],
-      },
-      showModal: false,
-      currentButton: null // 押されたボタンの情報を保存するプロパティを追加
-    };
-  },
-  mounted() {
+  setup() {
     const buttonStore = useButtonStore();
-  axios.get('/test2.json')
-    .then(response => {
-      this.data.parVals2 = response.data.map(element => {
-        const item = element.menu.item; // ネストされたitemにアクセス
-        const isActive = buttonStore.outputTexts.some(storeItem => storeItem.text === item.text && storeItem.status === 'ON');
+    const showModal = ref(false);
+    const currentButton = ref(null);
+    const apiData = ref([]);
+
+    // APIからデータを取得
+    onMounted(() => {
+      axios.get('/test2.json')
+        .then(response => {
+          apiData.value = response.data.map(element => element.menu.item);
+        })
+        .catch(error => {
+          console.error('データの取得エラー: ', error);
+        });
+    });
+
+    // buttonDataをcomputedで動的に生成
+    const buttonData = computed(() => {
+      // ストアの状態を反映させて、ボタンの状態をリアルタイムに更新
+      return apiData.value.map(item => {
+        const storeItem = buttonStore.outputTexts.find(storeItem => storeItem.text === item.text);
         return {
           text: item.text,
           value: item.value,
-          active: isActive // ストアの状態を反映
+          active: storeItem ? storeItem.status === 'ON' : false
         };
       });
-    })
-    .catch(error => {
-      console.error('データの取得エラー: ', error);
     });
-  },
-  methods: {
-    handleButtonClick(link) {
-      const buttonStore = useButtonStore();
-      link.active = !link.active; // ON/OFFの切り替え
-      buttonStore.toggleButton(link.text);
 
-      // outputTextsを更新
-      this.outputTexts = buttonStore.outputTexts.map(item => item.text);
-    
-      console.log("buttonStore.outputTexts=>", JSON.stringify(buttonStore.outputTexts, null, 2)); // JSON形式で出力
-      this.$emit('updateMessage', `${link.text}が${link.active ? 'ON' : 'OFF'}になりました！`);
-      this.$emit('updateOutputTexts', buttonStore.outputTexts);
-      document.getElementById('spn1').textContent = `${link.text}が${link.active ? 'ON' : 'OFF'}になりました！`;
-
-      // モーダルを表示
-      this.showModal = true;
-      this.currentButton = link; // 押されたボタンの情報を保存      
-    },
-
-    handleUpdateModalInputValues(inputValue) {
-      console.log("@@@　handleUpdateModalInputValues　＠＠＠:");
-      const buttonStore = useButtonStore();
-      if (this.currentButton) {
-        // ストアのアクションを呼び出して数量を更新
-        buttonStore.updateItemQuantity(this.currentButton.text, inputValue);
+    const handleButtonClick = (link) => {
+      // ボタンの状態をトグルする前に、ストアに新しいアイテムを存在させます
+      const existingItem = buttonStore.outputTexts.find(item => item.text === link.text);
+      if (!existingItem) {
+          buttonStore.outputTexts.push({ text: link.text, status: 'OFF', inputValue: 1 });
       }
-      //
-      const buttonIndex = buttonStore.outputTexts.findIndex(item => item.text === this.currentButton.text);
-      console.log("buttonIndex:", buttonIndex);
-      if (buttonIndex !== -1) {
-        buttonStore.outputTexts[buttonIndex].inputValue = inputValue; // 入力値を設定
+
+      buttonStore.toggleButton(link.text);
+      console.log("buttonStore.outputTexts=>", JSON.stringify(buttonStore.outputTexts, null, 2));
+      
+      const statusText = buttonStore.outputTexts.find(item => item.text === link.text)?.status === 'ON' ? 'ON' : 'OFF';
+      // emitは不要
+      // this.$emit('updateMessage', `${link.text}が${statusText}になりました！`);
+      // this.$emit('updateOutputTexts', buttonStore.outputTexts);
+      document.getElementById('spn1').textContent = `${link.text}が${statusText}になりました！`;
+
+      showModal.value = true;
+      currentButton.value = link;
+    };
+
+    const handleUpdateModalInputValues = (inputValue) => {
+      console.log("@@@　handleUpdateModalInputValues　＠＠＠:");
+      if (currentButton.value) {
+        buttonStore.updateItemQuantity(currentButton.value.text, inputValue);
       }
       console.log("Updated outputTexts:", buttonStore.outputTexts);
-    }
+    };
+
+    return {
+      showModal,
+      currentButton,
+      buttonData,
+      handleButtonClick,
+      handleUpdateModalInputValues,
+      // setup() でデータを返さないので、input v-model="message" は削除
+    };
   }
 };
 </script>
