@@ -15,40 +15,52 @@
   <div>
     <span id="spn1">表示用のテキスト</span>
   </div>
+  <TestModal 
+    v-if="showModal" 
+    :show="showModal" 
+    title="何人前ですか？" 
+    content="注文数を入力してください。" 
+    @close="showModal = false" 
+    @updateModalInputValues="handleUpdateModalInputValues"
+  />
 </template>
 
 <script>
 import axios from 'axios';
 import { useButtonStore } from './store';
+import TestModal from './TestModal.vue';
 
 export default {
   name: 'AppVue',
-  props: {
-    message: String
+  components: {
+    TestModal
   },
   data() {
     return {
       data: {
         parVals2: [],
-      }
+      },
+      showModal: false,
+      currentButton: null // 押されたボタンの情報を保存するプロパティを追加
     };
   },
   mounted() {
     const buttonStore = useButtonStore();
-    axios.get('/test2.json')
-      .then(response => {
-        this.data.parVals2 = response.data.map(element => {
-          const isActive = buttonStore.outputTexts.some(item => item.text === element.text && item.status === 'ON');
-          return {
-            text: element.text,
-            value: element.value,
-            active: isActive // ストアの状態を反映
-          };
-        });
-      })
-      .catch(error => {
-        console.error('Error fetching data: ', error);
+  axios.get('/test2.json')
+    .then(response => {
+      this.data.parVals2 = response.data.map(element => {
+        const item = element.menu.item; // ネストされたitemにアクセス
+        const isActive = buttonStore.outputTexts.some(storeItem => storeItem.text === item.text && storeItem.status === 'ON');
+        return {
+          text: item.text,
+          value: item.value,
+          active: isActive // ストアの状態を反映
+        };
       });
+    })
+    .catch(error => {
+      console.error('データの取得エラー: ', error);
+    });
   },
   methods: {
     handleButtonClick(link) {
@@ -63,6 +75,26 @@ export default {
       this.$emit('updateMessage', `${link.text}が${link.active ? 'ON' : 'OFF'}になりました！`);
       this.$emit('updateOutputTexts', buttonStore.outputTexts);
       document.getElementById('spn1').textContent = `${link.text}が${link.active ? 'ON' : 'OFF'}になりました！`;
+
+      // モーダルを表示
+      this.showModal = true;
+      this.currentButton = link; // 押されたボタンの情報を保存      
+    },
+
+    handleUpdateModalInputValues(inputValue) {
+      console.log("@@@　handleUpdateModalInputValues　＠＠＠:");
+      const buttonStore = useButtonStore();
+      if (this.currentButton) {
+        // ストアのアクションを呼び出して数量を更新
+        buttonStore.updateItemQuantity(this.currentButton.text, inputValue);
+      }
+      //
+      const buttonIndex = buttonStore.outputTexts.findIndex(item => item.text === this.currentButton.text);
+      console.log("buttonIndex:", buttonIndex);
+      if (buttonIndex !== -1) {
+        buttonStore.outputTexts[buttonIndex].inputValue = inputValue; // 入力値を設定
+      }
+      console.log("Updated outputTexts:", buttonStore.outputTexts);
     }
   }
 };

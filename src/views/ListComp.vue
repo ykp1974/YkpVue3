@@ -1,16 +1,36 @@
 <template>
     <div>
-      <div v-if="message != undefined">{{message}}</div>
-      <ul>
-        <li v-for="item in outputTexts" :key="item.text">{{ item }}- {{ item.status }}</li>
-      </ul>
+      <div v-if="orderItems.length > 0">
+        <h3>注文リスト</h3>
+        <ul>
+          <li v-for="item in orderItems" :key="item.text">
+            {{ item.text }} - {{ item.inputValue }} 個
+          </li>
+        </ul>
+      </div>
+      <div v-else>
+        <p>注文された商品はありません。</p>
+      </div>
       <input type="button" @click="createUser" value="送信">
     </div>
 </template>
   
   <script>
+  import { useButtonStore } from './store'; // ストアをインポート
   import axios from 'axios';
+  import { computed } from 'vue'; // ここにcomputedを追加
   export default {
+    setup() {
+      const buttonStore = useButtonStore();
+      // ストアのデータをリアクティブに取得
+      const orderItems = computed(() => 
+        buttonStore.outputTexts.filter(item => item.status === 'ON')
+      );
+
+      return {
+        orderItems,
+      };
+    }, 
     props:{
         outputTexts: {
             type: Array,
