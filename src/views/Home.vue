@@ -21,6 +21,7 @@
     content="注文数を入力してください。"
     @close="showModal = false"
     @updateModalInputValues="handleUpdateModalInputValues"
+    :initialValue="currentButton ? currentButton.inputValue : 0"
   />
 </template>
 
