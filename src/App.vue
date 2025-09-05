@@ -1,7 +1,7 @@
 <template>
   <div id="nav">
     <router-link :message="message" to="/">Home</router-link> |
-    <router-link :to="{ name: 'ListComp', params: { message: this.message, outputTexts: this.outputTexts } }">Order</router-link> | 
+    <router-link :to="{ name: 'ListComp', params: { message: this.message, outputTexts: this.outputTexts } }">Order</router-link> |
     <router-link to="/about">About</router-link>
   </div>
   <router-view @updateMessage="updateMessage" @updateOutputTexts="updateOutputTexts" />
@@ -21,10 +21,10 @@ export default {
       this.message = newMessage;
     },
     updateOutputTexts(newOutputTexts) {
-      console.log('this.outputTexts@@-->'+JSON.stringify(newOutputTexts));
+      console.log('this.outputTexts@@-->' + JSON.stringify(newOutputTexts));
       // OFFの場合は削除
       this.outputTexts = newOutputTexts.filter(item => item.status !== 'OFF').map(item => item.text);
     }
-  }    
+  }
 };
 </script>

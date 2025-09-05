@@ -4,23 +4,22 @@
   <h1>Home Page</h1>
   <div class="button-container">
     <template v-for="link in buttonData" :key="link.text">
-      <button 
-        v-on:click="handleButtonClick(link)" 
-        :class="{'large-button btn': true, 'active': link.active}" 
-        class="large-button btn">
-        {{ link.text }}
+      <button
+        v-on:click="handleButtonClick(link)"
+        :class="{'large-button btn': true, 'active': link.active}"
+        v-html="getButtonText(link)">
       </button>
     </template>
   </div>
   <div>
     <span id="spn1">表示用のテキスト</span>
   </div>
-  <TestModal 
-    v-if="showModal" 
-    :show="showModal" 
-    title="何人前ですか？" 
-    content="注文数を入力してください。" 
-    @close="showModal = false" 
+  <TestModal
+    v-if="showModal"
+    :show="showModal"
+    title="何人前ですか？"
+    content="注文数を入力してください。"
+    @close="showModal = false"
     @updateModalInputValues="handleUpdateModalInputValues"
   />
 </template>
@@ -36,7 +35,7 @@ export default {
   components: {
     TestModal
   },
-  setup() {
+  setup(props, { emit }) {
     const buttonStore = useButtonStore();
     const showModal = ref(false);
     const currentButton = ref(null);
@@ -61,37 +60,55 @@ export default {
         return {
           text: item.text,
           value: item.value,
-          active: storeItem ? storeItem.status === 'ON' : false
+          active: storeItem ? storeItem.status === 'ON' : false,
+          inputValue: storeItem ? storeItem.inputValue : 0 // inputValueを追加
         };
       });
     });
 
     const handleButtonClick = (link) => {
-      // ボタンの状態をトグルする前に、ストアに新しいアイテムを存在させます
-      const existingItem = buttonStore.outputTexts.find(item => item.text === link.text);
-      if (!existingItem) {
-          buttonStore.outputTexts.push({ text: link.text, status: 'OFF', inputValue: 1 });
-      }
-
-      buttonStore.toggleButton(link.text);
-      console.log("buttonStore.outputTexts=>", JSON.stringify(buttonStore.outputTexts, null, 2));
-      
-      const statusText = buttonStore.outputTexts.find(item => item.text === link.text)?.status === 'ON' ? 'ON' : 'OFF';
-      // emitは不要
-      // this.$emit('updateMessage', `${link.text}が${statusText}になりました！`);
-      // this.$emit('updateOutputTexts', buttonStore.outputTexts);
-      document.getElementById('spn1').textContent = `${link.text}が${statusText}になりました！`;
-
-      showModal.value = true;
+      // 修正ポイント：このメソッドではモーダルを開く処理のみ行う
       currentButton.value = link;
+      showModal.value = true;
     };
 
     const handleUpdateModalInputValues = (inputValue) => {
       console.log("@@@　handleUpdateModalInputValues　＠＠＠:");
       if (currentButton.value) {
-        buttonStore.updateItemQuantity(currentButton.value.text, inputValue);
+        const existingItem = buttonStore.outputTexts.find(item => item.text === currentButton.value.text);
+        
+        if (inputValue > 0) {
+          // 注文数が0より大きい場合、ONにする
+          if (existingItem) {
+            existingItem.status = 'ON';
+          } else {
+            // 新しい要素を追加
+            buttonStore.outputTexts.push({ text: currentButton.value.text, status: 'ON', inputValue: inputValue });
+          }
+          buttonStore.updateItemQuantity(currentButton.value.text, inputValue);
+        } else {
+          // 注文数が0の場合、OFFにする
+          if (existingItem) {
+            existingItem.status = 'OFF';
+            buttonStore.updateItemQuantity(currentButton.value.text, 0);
+          }
+        }
+        
+        emit('updateOutputTexts', buttonStore.outputTexts);
+        
+        console.log("Updated outputTexts:", buttonStore.outputTexts);
+        const statusText = buttonStore.outputTexts.find(item => item.text === currentButton.value.text)?.status === 'ON' ? 'ON' : 'OFF';
+        document.getElementById('spn1').textContent = `${currentButton.value.text}が${statusText}になりました！`;
       }
-      console.log("Updated outputTexts:", buttonStore.outputTexts);
+    };
+
+    // ボタンのテキストを動的に生成するメソッド
+    const getButtonText = (link) => {
+      const storeItem = buttonStore.outputTexts.find(item => item.text === link.text);
+      if (storeItem && storeItem.status === 'ON' && storeItem.inputValue > 0) {
+        return `${link.text}<br/><span class="order-quantity">x ${storeItem.inputValue}</span>`;
+      }
+      return link.text;
     };
 
     return {
@@ -100,7 +117,7 @@ export default {
       buttonData,
       handleButtonClick,
       handleUpdateModalInputValues,
-      // setup() でデータを返さないので、input v-model="message" は削除
+      getButtonText, // メソッドを公開
     };
   }
 };
@@ -113,6 +130,9 @@ export default {
   font-size: 16px;
   background-color: #d3d3d3; /* 薄いグレー */
   color: black; /* OFF状態のテキスト色 */
+  line-height: 1.2; /* 行間を調整 */
+  padding-top: 50px; /* テキストを上部に寄せる */
+  text-align: center;
 }
 .large-button.active {
   background-color: #333; /* ON状態の色 */
@@ -124,5 +144,9 @@ export default {
   max-height: 600px; /* 2つのボタンの高さ */
   max-width: 640px; /* 2つのボタンの幅 */
   overflow-y: scroll;
+}
+.order-quantity {
+  color: red;
+  font-weight: bold;
 }
 </style>

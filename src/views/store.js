@@ -7,12 +7,6 @@ export const useButtonStore = defineStore('buttonStore', {
   }),
   actions: {
     toggleButton(text) {
-      // const index = this.outputTexts.findIndex(item => item.text === text);
-      // if (index !== -1) {
-      //   this.outputTexts[index].status = this.outputTexts[index].status === 'ON' ? 'OFF' : 'ON';
-      // } else {
-      //   this.outputTexts.push({ text, status: 'ON' });
-      // }
       const item = this.outputTexts.find(item => item.text === text);
       if (item) {
         item.status = item.status === 'ON' ? 'OFF' : 'ON';
@@ -28,7 +22,7 @@ export const useButtonStore = defineStore('buttonStore', {
       if (item) {
         item.inputValue = quantity;
       }
-    },    
+    },
     setOutputTexts(outputTexts) {
       this.outputTexts = outputTexts;
     }
