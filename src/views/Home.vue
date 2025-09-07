@@ -15,13 +15,13 @@
     <span id="spn1">表示用のテキスト</span>
   </div>
   <TestModal
-    v-if="showModal"
+    v-show="showModal"
     :show="showModal"
     title="何人前ですか？"
     content="注文数を入力してください。"
     @close="showModal = false"
     @updateModalInputValues="handleUpdateModalInputValues"
-    :initialValue="currentButton ? currentButton.inputValue : 0"
+    :initial-value="currentButton ? currentButton.inputValue : 0"
   />
 </template>
 
