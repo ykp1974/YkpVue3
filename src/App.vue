@@ -5,7 +5,7 @@
     <router-link to="/about">About</router-link>
   </div>
   <router-view @updateMessage="updateMessage" @updateOutputTexts="updateOutputTexts" />
-  <input v-model="message">
+  <!-- <input v-model="message"> -->
 </template>
 
 <script>

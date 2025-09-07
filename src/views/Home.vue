@@ -11,9 +11,6 @@
       </button>
     </template>
   </div>
-  <div>
-    <span id="spn1">表示用のテキスト</span>
-  </div>
   <TestModal
     v-show="showModal"
     :show="showModal"
@@ -70,6 +67,7 @@ export default {
     const handleButtonClick = (link) => {
       // 修正ポイント：このメソッドではモーダルを開く処理のみ行う
       currentButton.value = link;
+      console.log('モーダルに渡す注文数:', currentButton.value.inputValue); // ここにconsole.logを追加
       showModal.value = true;
     };
 
@@ -98,8 +96,6 @@ export default {
         emit('updateOutputTexts', buttonStore.outputTexts);
         
         console.log("Updated outputTexts:", buttonStore.outputTexts);
-        const statusText = buttonStore.outputTexts.find(item => item.text === currentButton.value.text)?.status === 'ON' ? 'ON' : 'OFF';
-        document.getElementById('spn1').textContent = `${currentButton.value.text}が${statusText}になりました！`;
       }
     };
 
