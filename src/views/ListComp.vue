@@ -1,59 +1,61 @@
 <template>
-    <div>
-      <div v-if="orderItems.length > 0">
-        <h3>注文リスト</h3>
-        <ul>
-          <li v-for="item in orderItems" :key="item.text">
-            {{ item.text }} - {{ item.inputValue }} 個
-          </li>
-        </ul>
+      <div>
+        <div v-if="orderItems.length > 0">
+          <h3>注文リスト</h3>
+          <ul>
+            <li v-for="item in orderItems" :key="item.text">
+              {{ item.text }} - {{ item.inputValue }} 個
+            </li>
+          </ul>
+        </div>
+        <div v-else>
+          <p>注文された商品はありません。</p>
+        </div>
+        <input type="button" @click="sendOrder" value="送信">
       </div>
-      <div v-else>
-        <p>注文された商品はありません。</p>
-      </div>
-      <input type="button" @click="createUser" value="送信">
-    </div>
-</template>
+  </template>
 
-<script>
-import { useButtonStore } from './store'; // ストアをインポート
-import axios from 'axios';
-import { computed } from 'vue'; // ここにcomputedを追加
-export default {
-  setup() {
-    const buttonStore = useButtonStore();
-    // ストアのデータをリアクティブに取得
-    const orderItems = computed(() =>
-      buttonStore.outputTexts.filter(item => item.status === 'ON')
-    );
+  <script>
+  import { useButtonStore } from './store';
+  import axios from 'axios';
+  import { computed } from 'vue';
+  export default {
+    setup() {
+      const buttonStore = useButtonStore();
+      const orderItems = computed(() =>
+        buttonStore.outputTexts.filter(item => item.status === 'ON')
+      );
 
-    return {
-      orderItems,
-    };
-  },
-  props:{
-      outputTexts: {
-          type: Array,
-          required: true
-      }
-  },
-  data() {
-    return {
-      profileId: this.$route.query.profileId,
-    }
-  },
-  methods: {
-    createUser: function () {
-      axios.get('https://script.google.com/macros/s/AKfycbxKqUMis09kMBL3MmntzXGFoAJYF1wQcDOAB71bTCEDOaCBV09D461AA-Ky59gVdTI/exec?order='+JSON.stringify(this.outputTexts))
-      .then(response => {
-        console.log(response.data);
-      })
-      .catch(error => {
-        console.error('Error fetching data: ', error);
-      });
-      // カスタムモーダルに置き換え
-      alert('オーダーを送信しました!');
+      return {
+        orderItems,
+      };
     },
+    props:{
+        outputTexts: {
+            type: Array,
+            required: true
+        }
+    },
+    data() {
+      return {
+        profileId: this.$route.query.profileId,
+      }
+    },
+    methods: {
+      sendOrder: function () {
+        // JSON.stringifyでデータを文字列に変換
+        const orderData = JSON.stringify(this.orderItems);
+
+        axios.get('https://script.google.com/macros/s/AKfycbzVJjlKzUkXmEcP8dUtnESIdvadN4iSpIMJtRlcMvYlvIpPaw-WtHBK2MotHzBKOaY/exec?order=' + encodeURIComponent(orderData))
+        .then(response => {
+          console.log(response.data);
+          // カスタムモーダルに置き換え
+          alert('オーダーを送信しました!');
+        })
+        .catch(error => {
+          console.error('Error fetching data: ', error);
+        });
+      },
+    }
   }
-}
-</script>
+  </script>
