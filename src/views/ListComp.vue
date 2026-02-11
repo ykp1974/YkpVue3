@@ -43,17 +43,41 @@
     },
     methods: {
       sendOrder: function () {
+        // ストアから取得した注文データ（orderItems）を整理して送信
+        // 循環参照や不要なプロパティを避けるため、必要な項目のみを抽出
+        const cleanData = this.orderItems.map(item => ({
+          text: item.text,
+          inputValue: item.inputValue
+        }));
         // JSON.stringifyでデータを文字列に変換
-        const orderData = JSON.stringify(this.orderItems);
+        // const orderData = JSON.stringify(this.orderItems);
+        const orderData = JSON.stringify(cleanData);
+        const url = 'https://script.google.com/macros/s/AKfycby4Qj8ZJ2rc23G3zzFr2cbK6dPYR89eVM2tEz-b77_YtvUWHq6lh6Y70NFl0MwYiio/exec';
 
-        axios.get('https://script.google.com/macros/s/AKfycbzVJjlKzUkXmEcP8dUtnESIdvadN4iSpIMJtRlcMvYlvIpPaw-WtHBK2MotHzBKOaY/exec?order=' + encodeURIComponent(orderData))
+        // axios.get('https://script.google.com/macros/s/AKfycby728kJ3rlPo305c6yWlqymlRr_bJu89XaGBJGQnY6Eyx72kIEY8lmrM-cOaDHZzqU/exec?order=' + encodeURIComponent(orderData))
+        // .then(response => {
+        //   console.log(response.data);
+        //   // カスタムモーダルに置き換え
+        //   alert('オーダーを送信しました!');
+        // })
+        // .catch(error => {
+        //   console.error('Error fetching data: ', error);
+        // });
+
+        axios.get(url + '?order=' + encodeURIComponent(orderData))
         .then(response => {
-          console.log(response.data);
-          // カスタムモーダルに置き換え
-          alert('オーダーを送信しました!');
+          console.log('Response:', response.data);
+          if (response.data.status === 'success') {
+            alert('オーダーを送信しました!');
+          } else {
+            alert('エラー: ' + response.data.message);
+          }
         })
         .catch(error => {
+          // GASのリダイレクトにより、成功していてもここに来る場合がありますが
+          // GAS側でContentServiceを返せば、基本的には.thenに入ります。
           console.error('Error fetching data: ', error);
+          alert('送信中にネットワークエラーが発生しました。');
         });
       },
     }
