@@ -51,9 +51,10 @@
         }));
         // JSON.stringifyでデータを文字列に変換
         // const orderData = JSON.stringify(this.orderItems);
-        const orderData = JSON.stringify(cleanData);
-        const url = 'https://script.google.com/macros/s/AKfycby4Qj8ZJ2rc23G3zzFr2cbK6dPYR89eVM2tEz-b77_YtvUWHq6lh6Y70NFl0MwYiio/exec';
+        // const orderData = JSON.stringify(cleanData);
+        const url = 'https://script.google.com/macros/s/AKfycbzilevW-OeRTrczq61YrWqwamcJkVAu0CAE-5a2rEM5eoBEY5n2Zko_RmWgP0wkaAM/exec';
 
+        // doGet時代のコード
         // axios.get('https://script.google.com/macros/s/AKfycby728kJ3rlPo305c6yWlqymlRr_bJu89XaGBJGQnY6Eyx72kIEY8lmrM-cOaDHZzqU/exec?order=' + encodeURIComponent(orderData))
         // .then(response => {
         //   console.log(response.data);
@@ -64,7 +65,12 @@
         //   console.error('Error fetching data: ', error);
         // });
 
-        axios.get(url + '?order=' + encodeURIComponent(orderData))
+        // axios.get(url + '?order=' + encodeURIComponent(orderData))
+        axios.post(url, JSON.stringify({ order: cleanData }), {
+          headers: {
+            'Content-Type': 'text/plain' // GASのdoPostへはJSONではなくtext/palinがよい
+          }
+        })
         .then(response => {
           console.log('Response:', response.data);
           if (response.data.status === 'success') {
