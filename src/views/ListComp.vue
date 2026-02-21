@@ -56,23 +56,13 @@
           text: item.text,
           inputValue: item.inputValue
         }));
-        // JSON.stringifyでデータを文字列に変換
-        // const orderData = JSON.stringify(this.orderItems);
-        // const orderData = JSON.stringify(cleanData);
-        const url = 'https://script.google.com/macros/s/AKfycbzilevW-OeRTrczq61YrWqwamcJkVAu0CAE-5a2rEM5eoBEY5n2Zko_RmWgP0wkaAM/exec';
-
-        // doGet時代のコード
-        // axios.get('https://script.google.com/macros/s/AKfycby728kJ3rlPo305c6yWlqymlRr_bJu89XaGBJGQnY6Eyx72kIEY8lmrM-cOaDHZzqU/exec?order=' + encodeURIComponent(orderData))
-        // .then(response => {
-        //   console.log(response.data);
-        //   // カスタムモーダルに置き換え
-        //   alert('オーダーを送信しました!');
-        // })
-        // .catch(error => {
-        //   console.error('Error fetching data: ', error);
-        // });
-
-        // axios.get(url + '?order=' + encodeURIComponent(orderData))
+        const url = process.env.VUE_APP_GAS_ORDER_URL;
+        if (!url) {
+          console.error('API URLが取得できません。環境変数とサーバー再起動を確認してください。');
+          alert('設定エラー：送信先URLが見つかりません。');
+          return;
+        }
+        
         axios.post(url, JSON.stringify({ order: cleanData }), {
           headers: {
             'Content-Type': 'text/plain' // GASのdoPostへはJSONではなくtext/palinがよい
