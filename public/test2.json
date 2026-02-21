@@ -66,9 +66,9 @@
     },
     "menu": {
       "item": {
-        "text": "耐乏ちくわの蒲焼丼",
+        "text": "豪華耐乏ちくわの蒲焼丼",
         "value": "値1",
-        "picname": "chikuwa_kabayaki_bowl.jpg"
+        "picname": "gogeous_chikuwa_kabayaki_bowl.jpg"
       }
     }
   },
@@ -78,9 +78,9 @@
     },
     "menu": {
       "item": {
-        "text": "耐乏もやし御膳",
+        "text": "耐乏塩パスタ",
         "value": "値1",
-        "picname": "moyashi_plate.jpg"
+        "picname": "pasta_with_solt.jpg"
       }
     }
   },
@@ -90,9 +90,9 @@
     },
     "menu": {
       "item": {
-        "text": "豪華耐乏キャベツ焼き",
+        "text": "耐乏草喰っとけ",
         "value": "値1",
-        "picname": "gogeous_grilled_cabbage.jpg"
+        "picname": "just_eat_these_leaves.jpg"
       }
     }
   },
@@ -102,9 +102,9 @@
     },
     "menu": {
       "item": {
-        "text": "耐乏焼き肉のタレ丼",
+        "text": "豪華耐乏ツナマヨ丼",
         "value": "値1",
-        "picname": "gogious_rice_bowl_with_bbq_source.jpg"
+        "picname": "gogious_rice_bowl_with_tuna_mayo.jpg"
       }
     }
   },
@@ -114,9 +114,9 @@
     },
    "menu": {
       "item": {
-        "text": "超豪華シャンタオ粥御膳",
+        "text": "超豪華草喰っとけ",
         "value": "値1",
-        "picname": "gogious_xiantao_risotto_plate.jpg"
+        "picname": "gogious_just_eat_these_leaves.jpg"
       }
     }
   }

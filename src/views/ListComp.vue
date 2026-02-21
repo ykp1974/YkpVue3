@@ -1,17 +1,24 @@
 <template>
-      <div>
-        <div v-if="orderItems.length > 0">
-          <h3>注文リスト</h3>
-          <ul>
-            <li v-for="item in orderItems" :key="item.text">
-              {{ item.text }} - {{ item.inputValue }} 個
-            </li>
-          </ul>
+      <div class="list-container">
+        <h2 class="list-title">注文リスト</h2>        
+        <div class="order-content">
+          <div v-if="orderItems.length > 0">
+            <!-- <h3>注文リスト</h3> -->
+            <ul>
+              <li v-for="item in orderItems" :key="item.text">
+                {{ item.text }} - {{ item.inputValue }} 個
+              </li>
+            </ul>
+          </div>
+          <div v-else>
+            <p>注文された商品はありません。</p>
+          </div>
+          <div class="button-area">
+            <button class="modern-send-button" @click="sendOrder">
+              <span class="btn-text">オーダーを送信する</span>
+            </button>
+          </div>
         </div>
-        <div v-else>
-          <p>注文された商品はありません。</p>
-        </div>
-        <input type="button" @click="sendOrder" value="送信">
       </div>
   </template>
 
@@ -89,3 +96,110 @@
     }
   }
   </script>
+
+<style scoped>
+.list-container {
+  padding: 40px 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.list-title {
+  font-weight: bold;
+  color: #2c3e50;
+  font-size: 1.8rem;
+  margin-bottom: 30px;
+  border-left: 5px solid #42b983;
+  padding-left: 15px;
+}
+
+.order-items {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.order-card {
+  background-color: #ffffff;
+  border: 1px solid #eaeaea;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  transition: transform 0.2s;
+}
+
+.order-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.item-text {
+  font-weight: bold;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.empty-message {
+  color: #999;
+  text-align: center;
+  padding: 40px;
+}
+
+.button-area {
+  margin-top: 50px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.modern-send-button {
+  appearance: none;
+  background: linear-gradient(135deg, #42b983 0%, #38a171 100%);
+  color: white;
+  border: none;
+  padding: 16px 48px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 10px 15px -3px rgba(66, 185, 131, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.modern-send-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgba(66, 185, 131, 0.4);
+  filter: brightness(1.05);
+}
+
+.modern-send-button:active {
+  transform: translateY(0);
+  box-shadow: 0 5px 10px -3px rgba(66, 185, 131, 0.3);
+}
+
+.modern-send-button::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.modern-send-button:hover::after {
+  opacity: 1;
+}
+
+.btn-text {
+  position: relative;
+  z-index: 1;
+}
+</style>

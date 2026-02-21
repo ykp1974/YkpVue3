@@ -1,7 +1,7 @@
 <template>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-  <h1>Home Page</h1>
+  <h2 class="list-title">商品選択/入力後「オーダー画面」へ</h2> 
   <div class="button-container">
     <template v-for="link in buttonData" :key="link.text">
       <button
@@ -128,6 +128,16 @@ export default {
 </script>
 
 <style scoped>
+
+.list-title {
+  font-weight: bold;
+  color: #2c3e50;
+  font-size: 1.8rem;
+  margin-bottom: 30px;
+  border-left: 5px solid #42b983;
+  padding-left: 15px;
+}
+
 .button-container {
   display: flex;
   flex-wrap: wrap;
