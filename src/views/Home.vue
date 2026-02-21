@@ -7,6 +7,7 @@
       <button
         v-on:click="handleButtonClick(link)"
         :class="{'large-button btn': true, 'active': link.active}"
+        :style="getButtonStyle(link)"
         v-html="getButtonText(link)">
       </button>
     </template>
@@ -39,7 +40,6 @@ export default {
     const currentButton = ref(null);
     const apiData = ref([]);
 
-    // APIからデータを取得
     onMounted(() => {
       axios.get('/test2.json')
         .then(response => {
@@ -50,62 +50,68 @@ export default {
         });
     });
 
-    // buttonDataをcomputedで動的に生成
     const buttonData = computed(() => {
-      // ストアの状態を反映させて、ボタンの状態をリアルタイムに更新
       return apiData.value.map(item => {
-        const storeItem = buttonStore.outputTexts.find(storeItem => storeItem.text === item.text);
+        const storeItem = buttonStore.outputTexts.find(si => si.text === item.text);
         return {
           text: item.text,
           value: item.value,
+          image: `/img/${item.picname}`,
+          // image: `/img/grilled_cabbage.png`,
+          
           active: storeItem ? storeItem.status === 'ON' : false,
-          inputValue: storeItem ? storeItem.inputValue : 0 // inputValueを追加
+          inputValue: storeItem ? storeItem.inputValue : 0
         };
       });
     });
 
+    const getButtonStyle = (link) => {
+      const fileName = link.image.split('/').pop();
+      const encodedUrl = `/img/${encodeURIComponent(fileName)}`;
+
+      return {
+        // backgroundSize: 'cover' により、ボタンの隙間なく画像が広がります
+        backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.5)), url("${encodedUrl}")`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundColor: '#666',
+        color: 'white'
+      };
+    };
+
     const handleButtonClick = (link) => {
-      // 修正ポイント：このメソッドではモーダルを開く処理のみ行う
       currentButton.value = link;
-      console.log('モーダルに渡す注文数:', currentButton.value.inputValue); // ここにconsole.logを追加
       showModal.value = true;
     };
 
     const handleUpdateModalInputValues = (inputValue) => {
-      console.log("@@@　handleUpdateModalInputValues　＠＠＠:");
       if (currentButton.value) {
         const existingItem = buttonStore.outputTexts.find(item => item.text === currentButton.value.text);
-        
         if (inputValue > 0) {
-          // 注文数が0より大きい場合、ONにする
           if (existingItem) {
             existingItem.status = 'ON';
           } else {
-            // 新しい要素を追加
             buttonStore.outputTexts.push({ text: currentButton.value.text, status: 'ON', inputValue: inputValue });
           }
           buttonStore.updateItemQuantity(currentButton.value.text, inputValue);
         } else {
-          // 注文数が0の場合、OFFにする
           if (existingItem) {
             existingItem.status = 'OFF';
             buttonStore.updateItemQuantity(currentButton.value.text, 0);
           }
         }
-        
         emit('updateOutputTexts', buttonStore.outputTexts);
-        
-        console.log("Updated outputTexts:", buttonStore.outputTexts);
       }
     };
 
-    // ボタンのテキストを動的に生成するメソッド
     const getButtonText = (link) => {
       const storeItem = buttonStore.outputTexts.find(item => item.text === link.text);
       if (storeItem && storeItem.status === 'ON' && storeItem.inputValue > 0) {
-        return `${link.text}<br/><span class="order-quantity">x ${storeItem.inputValue}</span>`;
+        // 文字列の配置を整えるため、クラスを調整
+        return `<div class="btn-content"><span class="item-name">${link.text}</span><span class="order-quantity">x ${storeItem.inputValue}</span></div>`;
       }
-      return link.text;
+      return `<div class="btn-content"><span class="item-name">${link.text}</span></div>`;
     };
 
     return {
@@ -114,36 +120,64 @@ export default {
       buttonData,
       handleButtonClick,
       handleUpdateModalInputValues,
-      getButtonText, // メソッドを公開
+      getButtonText,
+      getButtonStyle
     };
   }
 };
 </script>
 
-<style>
-.large-button {
-  width: 300px;
-  height: 300px;
-  font-size: 16px;
-  background-color: #d3d3d3; /* 薄いグレー */
-  color: black; /* OFF状態のテキスト色 */
-  line-height: 1.2; /* 行間を調整 */
-  padding-top: 50px; /* テキストを上部に寄せる */
-  text-align: center;
-}
-.large-button.active {
-  background-color: #333; /* ON状態の色 */
-  color: white; /* ON状態のテキスト色 */
-}
+<style scoped>
 .button-container {
   display: flex;
   flex-wrap: wrap;
-  max-height: 600px; /* 2つのボタンの高さ */
-  max-width: 640px; /* 2つのボタンの幅 */
-  overflow-y: scroll;
+  gap: 15px;
+  padding: 20px;
 }
-.order-quantity {
-  color: red;
+
+.large-button {
+  width: 280px;  /* お好みのサイズに固定 */
+  height: 280px;
+  padding: 0 !important; /* Bootstrapの干渉を確実に防ぐ */
+  margin: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  outline: none;
+}
+
+/* 選択時のエフェクトを「枠線」から「光り（box-shadow）」に変更して画像を邪魔しないようにする */
+.large-button.active {
+  box-shadow: inset 0 0 0 6px #ffcc00; /* 内側に枠線を出す */
+}
+
+:deep(.btn-content) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+:deep(.item-name) {
+  font-size: 1.5rem;
   font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+  pointer-events: none; /* テキストがクリックの邪魔をしないように */
+}
+
+:deep(.order-quantity) {
+  margin-top: 10px;
+  background-color: #ff3333;
+  color: white;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: 1.2rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
 }
 </style>

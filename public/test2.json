@@ -5,8 +5,9 @@
     },
     "menu": {
       "item": {
-        "text": "耐乏シャンタオ粥",
-        "value": "値1"
+        "text": "耐乏ちくわの蒲焼丼",
+        "value": "値1",
+        "picname": "chikuwa_kabayaki_bowl.jpg"
       }
     }
   },
@@ -17,7 +18,8 @@
     "menu": {
       "item": {
         "text": "耐乏もやし御膳",
-        "value": "値1"
+        "value": "値1",
+        "picname": "moyashi_plate.jpg"
       }
     }
   },
@@ -28,7 +30,8 @@
     "menu": {
       "item": {
         "text": "豪華耐乏キャベツ焼き",
-        "value": "値1"
+        "value": "値1",
+        "picname": "gogeous_grilled_cabbage.jpg"
       }
     }
   },
@@ -39,7 +42,8 @@
     "menu": {
       "item": {
         "text": "耐乏焼き肉のタレ丼",
-        "value": "値1"
+        "value": "値1",
+        "picname": "gogious_rice_bowl_with_bbq_source.jpg"
       }
     }
   },
@@ -50,8 +54,71 @@
    "menu": {
       "item": {
         "text": "超豪華シャンタオ粥御膳",
-        "value": "値1"
+        "value": "値1",
+        "picname": "gogious_xiantao_risotto_plate.jpg"
       }
     }
   }
+,
+  {
+    "menu_name": {
+      "text": "耐乏ツアー1"
+    },
+    "menu": {
+      "item": {
+        "text": "耐乏ちくわの蒲焼丼",
+        "value": "値1",
+        "picname": "chikuwa_kabayaki_bowl.jpg"
+      }
+    }
+  },
+  {
+    "menu_name": {
+      "text": "耐乏ツアー2"
+    },
+    "menu": {
+      "item": {
+        "text": "耐乏もやし御膳",
+        "value": "値1",
+        "picname": "moyashi_plate.jpg"
+      }
+    }
+  },
+  {
+    "menu_name": {
+      "text": "耐乏ツアー3"
+    },
+    "menu": {
+      "item": {
+        "text": "豪華耐乏キャベツ焼き",
+        "value": "値1",
+        "picname": "gogeous_grilled_cabbage.jpg"
+      }
+    }
+  },
+  {
+    "menu_name": {
+      "text": "耐乏ツアー4"
+    },
+    "menu": {
+      "item": {
+        "text": "耐乏焼き肉のタレ丼",
+        "value": "値1",
+        "picname": "gogious_rice_bowl_with_bbq_source.jpg"
+      }
+    }
+  },
+  {
+    "menu_name": {
+      "text": "耐乏ツアー5"
+    },
+   "menu": {
+      "item": {
+        "text": "超豪華シャンタオ粥御膳",
+        "value": "値1",
+        "picname": "gogious_xiantao_risotto_plate.jpg"
+      }
+    }
+  }
+
 ]
