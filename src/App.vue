@@ -15,7 +15,7 @@
           <router-link to="/" class="nav-item">Home</router-link>
         </div>
         <div class="nav-right">
-          <router-link to="/About" class="nav-item">About</router-link>
+          <router-link to="/About" class="nav-item">History List</router-link>
         </div>
       </div>
     </div>
