@@ -1,0 +1,155 @@
+// スプレッドシートのデータを取得して返す関数
+function doGet() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    // シート名を実際の名称に合わせてください
+    const sheet = ss.getSheetByName("シート1"); 
+    
+    // データが存在する範囲を正確に取得
+    const lastRow = sheet.getLastRow();
+    if (lastRow < 2) {
+      return ContentService.createTextOutput(JSON.stringify([]))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    // 全データを取得
+    const values = sheet.getRange(1, 1, lastRow, 2).getValues();
+    
+    // 1行目をヘッダーとして処理
+    const headers = values.shift(); 
+    
+    const jsonResponse = values.map(row => {
+      let obj = {};
+      // 列番号に依存せず、ヘッダー名をキーにする
+      // もしヘッダーが空ならデフォルト名をつける
+      const key0 = headers[0] || "オーダー日時";
+      const key1 = headers[1] || "オーダー";
+      
+      // 日付オブジェクトを文字列に変換（重要：そのままJSONにすると空になる場合があります）
+      obj[key0] = row[0] instanceof Date ? Utilities.formatDate(row[0], "JST", "yyyy/MM/dd HH:mm:ss") : row[0];
+      obj[key1] = row[1];
+      console.log('obj[key0]->'+obj[key0]+', obj[key1]->'+obj[key1]);
+      return obj;
+    }).filter(item => item["オーダー日時"] !== "" || item["オーダー"] !== ""); // 空行を除外
+
+    return ContentService.createTextOutput(JSON.stringify(jsonResponse))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch (e) {
+    return ContentService.createTextOutput(JSON.stringify({status: "error", message: e.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function extractAndAlert() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('シート1'); // シート名を適宜変更してください
+  var range = sheet.getRange('A8:B16');
+  var values = range.getValues();
+  var jsonArray = [];
+  
+  // 日付で降順ソート
+  values.sort(function(a, b) {
+    return new Date(b[0]) - new Date(a[0]);
+  });
+  
+  // 最新の日付を取得
+  var latestDate = Utilities.formatDate(new Date(values[0][0]), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm:ss');
+  
+  for (var i = 0; i < values.length; i++) {
+    var date = values[i][0];
+    var order = values[i][1];
+    var formattedDate = Utilities.formatDate(new Date(date), Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm:ss');
+    
+    // 最新の日付を除外
+    if (formattedDate !== latestDate && formattedDate.startsWith('2024/08/05')) {
+      jsonArray.push({date: formattedDate, order: order});
+    }
+  }
+  
+  var json = JSON.stringify(jsonArray);
+  SpreadsheetApp.getUi().alert(json);
+}
+
+function doPost(e) {
+  try {
+    // 1. POSTされたリクエストボディ（JSON文字列）を取得
+    // axios.post(url, JSON.stringify({ order: ... })) で送った場合、ここに入ります
+    var postDataContents = e.postData.contents;
+    
+    if (!postDataContents) {
+      throw new Error("ポストデータが空です");
+    }
+
+    // 2. JSONデータをパース
+    var payload = JSON.parse(postDataContents);
+    var orderData = payload.order; // Vue側で { order: cleanData } として送っている場合
+
+    if (!orderData || !Array.isArray(orderData)) {
+      throw new Error("注文データ(order)が正しくありません");
+    }
+
+    // 3. スプレッドシートの準備
+    var spreadsheet = SpreadsheetApp.openById('1TsKt6rW6YcMsncQTDKDD0Pv_SnCGCsCxOY_-2dAshoI');
+    var sheet = spreadsheet.getSheetByName('シート1');
+
+    // 4. 書き込みデータの作成
+    var now = new Date();
+    var formattedDate = Utilities.formatDate(now, Session.getScriptTimeZone(), 'yyyy/MM/dd HH:mm:ss');
+
+    // オブジェクトの配列から「商品名 x 数量」の文字列を作成
+    var orderList = orderData.map(function(item) {
+      return item.text + ' x ' + item.inputValue;
+    }).join(', ');
+
+    // 5. 書き込み実行
+    var targetRow = 3;
+    sheet.insertRowBefore(targetRow);
+    sheet.getRange('A' + targetRow).setValue(formattedDate);
+    sheet.getRange('B' + targetRow).setValue(orderList);
+
+    // 6. レスポンスを返す（CORS回避のために必須）
+    return ContentService.createTextOutput(JSON.stringify({ 
+      status: 'success', 
+      message: '注文を受理しました',
+      received: orderList 
+    })).setMimeType(ContentService.MimeType.JSON);
+
+  } catch (err) {
+    // エラー発生時もJSONを返すことでブラウザ側のエラーハンドリングを助ける
+    return ContentService.createTextOutput(JSON.stringify({ 
+      status: 'error', 
+      message: err.toString() 
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+
+function test1() {
+  const sheet = SpreadsheetApp.getActiveSheet();
+  const data = sheet.getDataRange().getValues();
+  const searchDate = new Date("2024/08/03");
+
+  let firstIndex = -1;
+  let lastIndex = -1;
+
+  for (let i = 0; i < data.length; i++) {
+    const targetDate = new Date(data[i][0]);
+    targetDate.setHours(0, 0, 0, 0);
+    searchDate.setHours(0, 0, 0, 0);
+
+    if (targetDate.getTime() === searchDate.getTime()) {
+      if (firstIndex === -1) {
+        firstIndex = i;
+      }
+      lastIndex = i;
+    }
+  }
+
+  if (firstIndex !== -1) {
+    sheet.getRange("I8").setValue("A" + (firstIndex + 1));
+    sheet.getRange("i9").setValue("A" + (lastIndex + 1));
+  } else {
+    sheet.getRange("I8").setValue("日付は見つかりませんでした");
+    sheet.getRange("i9").setValue("日付は見つかりませんでした");
+  }
+}
