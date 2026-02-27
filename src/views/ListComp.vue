@@ -70,11 +70,20 @@
         })
         .then(response => {
           console.log('Response:', response.data);
+          // ライブラリ形式のレスポンスチェック
           if (response.data.status === 'success') {
-            alert('オーダーを送信しました!');
+            // 注文内容などは response.data.data の中に入っています
+            const detail = response.data.data.received;
+            alert('オーダーを送信しました!\n内容: ' + detail);
           } else {
+            // GAS側でキャッチしたエラー（ロック失敗など）
             alert('エラー: ' + response.data.message);
           }
+          // if (response.data.status === 'success') {
+          //   alert('オーダーを送信しました!');
+          // } else {
+          //   alert('エラー: ' + response.data.message);
+          // }
         })
         .catch(error => {
           // GASのリダイレクトにより、成功していてもここに来る場合がありますが
